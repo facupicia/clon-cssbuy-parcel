@@ -22,31 +22,14 @@
                 <p>Sorry, this feature is currently not available. Please try again later or contact support for
                     assistance.</p>
                 <p class="error-code">Error Code: 503</p>
-                <a href="index.html" class="back-home-btn">Back to Account</a>
+                <a href="profile.html" class="back-home-btn">Back to Account</a>
             </div>
         </main>
 
-        <nav class="bottom-nav">
-            <div class="nav-item">
-                <img src="iconos-menu/homeactive.svg" alt="Home" class="nav-icon">
-                <span>Home</span>
-            </div>
-            <div class="nav-item">
-                <div class="badge">0</div>
-                <img src="iconos-menu/notificationsactive.svg" alt="Notices" class="nav-icon">
-                <span>Notices</span>
-            </div>
-            <div class="nav-item">
-                <img src="iconos-menu/cartactive.svg" alt="Cart" class="nav-icon">
-                <span>Cart</span>
-            </div>
-            <div class="nav-item active-nav">
-                <img src="iconos-menu/useractive.svg" alt="Profile" class="nav-icon">
-                <span>Profile</span>
-            </div>
-        </nav>
+        <bottom-nav active="profile"></bottom-nav>
     </div>
 
+    <script src="components/bottom-nav.js"></script>
     <script>
         lucide.createIcons();
     </script>
