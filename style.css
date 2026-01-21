@@ -1,8 +1,8 @@
 :root {
-    --bg-black: #0a0a0a;
+    --bg-black: #0D1306;
     --card-bg: #1a1a1a;
     --header-gradient: #000000;
-    --profile-bg: #2a2a2a;
+    --profile-bg: #262626;
     --primary-green: #7cb83c;
     --text-white: #ffffff;
     --text-gray: #888888;
@@ -15,11 +15,11 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "sfR", "Inter", sans-serif !important;
 }
 
 body {
-    background-color: var(--bg-black);
+    background-color: #0D1306;
     color: var(--text-white);
     display: flex;
     justify-content: center;
@@ -29,7 +29,7 @@ body {
 .mobile-container {
     width: 100%;
     max-width: 400px;
-    background-color: var(--bg-black);
+    background-color: #0D1306;
     min-height: 100vh;
     padding-bottom: 70px;
 }
@@ -37,28 +37,30 @@ body {
 /* Header */
 header {
     background: var(--header-gradient);
-    padding: 18px 0;
+    padding: 18.5px 0;
 }
 
 header h1 {
     text-align: center;
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-size: 17px;
+    font-weight: bolder;
     color: var(--text-white);
+    letter-spacing: -1.1px;
 }
 
 /* Profile Section */
 .profile-section {
     background-color: var(--profile-bg);
     text-align: center;
-    padding: 25px 20px 20px;
+    padding: 20px 14px;
+    height: 407px;
 }
 
 .avatar {
-    width: 75px;
-    height: 75px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    margin: 0 auto 12px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -78,120 +80,88 @@ header h1 {
 }
 
 .username {
-    font-size: 1rem;
-    margin-bottom: 6px;
+    font-size: 16px;
+    margin-bottom: 7px;
+    margin-top: 7px;
     font-weight: 400;
+    font-style: inherit;
+    height: 19px;
 }
 
 .rating {
-    margin-bottom: 4px;
     display: flex;
-    align-items: center;
     justify-content: center;
-    gap: 2px;
+    align-items: center;
 }
 
-.star {
-    color: #444;
-    font-size: 0.9rem;
-}
-
-.star.active {
-    color: var(--primary-green);
-}
-
-.plus-icon {
-    background: var(--primary-green);
-    color: white;
-    border-radius: 50%;
-    width: 16px;
+.img {
+    overflow-clip-margin: content-box;
+    overflow: clip;
     height: 16px;
-    font-size: 0.7rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 4px;
+    width: 16px;
+    margin: 0 2px;
 }
+
 
 .validity {
     color: white;
-    font-weight: bold;
-    font-size: 0.8rem;
-    margin-bottom: 18px;
+    font-size: 15px;
+    text-align: center;
 }
 
 .balance-container {
-    margin-bottom: 15px;
 }
 
 .account-label {
     color: white;
-    font-size: 0.75rem;
-    margin-bottom: 4px;
+    font-size: 12px;
+    margin-top: 17px;
+    margin-bottom: 3px;
 }
 
 .balance {
-    font-size: 1.4rem;
+    font-size: 18px;
     font-weight: 500;
 }
 
 .balance span {
-    font-size: 1.1rem;
+    font-size: 18px;
     color: white;
+    font-weight: bolder;
 }
 
 .action-buttons {
+    padding: 20px 14px;
     display: flex;
-    gap: 12px;
-    margin-top: 15px;
-    width: 80%;
-    margin: 0 auto;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .action-buttons button {
-    flex: 1;
-    padding: 12px 30px;
-    border: none;
-    border-radius: 10px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-}
-
-.btn-recharge {
-    width: 169px;
+     width: 169px;
     height: 44px;
     background: rgb(135, 195, 73);
-    border-radius: 2px;
+    border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
     color: #ffffff;
+    font-size: 16px;
+    margin-top: 10px;
+    border-style: none;
 }
 
-.btn-refund {
-    width: 169px;
-    height: 44px;
-    background: rgb(135, 195, 73);
-    border-radius: 2px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #ffffff;
+.action-buttons button.btn-refund {
+    background: rgb(163, 163, 163);
+    margin-left: 9px;
 }
 
-.btn-refund {
-    background-color: var(--btn-gray);
-}
+
 
 .btn-icon {
     width: 16px;
     height: 16px;
+    margin: 0px 10px 0px 0px;
 }
 
 #my-parcel-btn {
@@ -200,17 +170,18 @@ header h1 {
 
 /* Stats Card */
 .stats-card {
-    background-color: black;
-    margin: 0 15px;
-    padding: 15px 18px;
-    border-radius: 12px;
-    margin-top: 20px
+    background-color: #0D1306;
+    padding: 18px;
+    border-radius: 8px;
 }
 
 .stat-row {
     display: flex;
     justify-content: space-between;
-    padding: 10px 0;
+}
+
+.stat-row:not(:last-child) {
+    margin-bottom: 12px;
 }
 
 .stat-row:last-child {
@@ -229,7 +200,7 @@ header h1 {
 
 .menu-grid-fuera {
     padding-top: 20px;
-    background-color: #242424 !important;
+    background-color: #1B1B1B !important;
     padding-bottom: 20px;
 }
 
@@ -239,7 +210,7 @@ header h1 {
     grid-template-columns: repeat(4, 1fr);
     gap: 35px;
     padding: 20px 15px;
-    background-color: black;
+    background-color: #0D1306;
     position: relative;
 }
 
@@ -300,7 +271,7 @@ header h1 {
 }
 
 .nav-icon {
-     width: 22px;
+    width: 22px;
     height: 22px;
     display: block;
     margin-bottom: 4px;
