@@ -18,6 +18,7 @@
     font-family: "sfR", "Inter", sans-serif !important;
 }
 
+
 body {
     background-color: #0D1306;
     color: var(--text-white);
@@ -31,7 +32,6 @@ body {
     max-width: 400px;
     background-color: #0D1306;
     min-height: 100vh;
-    padding-bottom: 70px;
 }
 
 /* Header */
@@ -109,8 +109,7 @@ header h1 {
     text-align: center;
 }
 
-.balance-container {
-}
+.balance-container {}
 
 .account-label {
     color: white;
@@ -121,7 +120,6 @@ header h1 {
 
 .balance {
     font-size: 18px;
-    font-weight: 500;
 }
 
 .balance span {
@@ -138,7 +136,7 @@ header h1 {
 }
 
 .action-buttons button {
-     width: 169px;
+    width: 169px;
     height: 44px;
     background: rgb(135, 195, 73);
     border-radius: 8px;
@@ -190,12 +188,11 @@ header h1 {
 
 .stat-row span:first-child {
     color: var(--text-white);
-    font-size: 0.9rem;
+    font-size: 16px;
 }
 
 .stat-value {
-    font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 16px;
 }
 
 .menu-grid-fuera {
@@ -253,7 +250,6 @@ header h1 {
 
 
 .icon-box i {
-    color: var(--primary-green);
     width: 26px;
     height: 26px;
 }
@@ -261,7 +257,6 @@ header h1 {
 .icon-box img {
     width: 28px;
     height: 28px;
-    filter: brightness(0) saturate(100%) invert(68%) sepia(52%) saturate(456%) hue-rotate(46deg) brightness(97%) contrast(89%);
 }
 
 .btn-icon {
@@ -322,9 +317,14 @@ header h1 {
     color: var(--primary-green);
 }
 
+.logout-container {
+    background-color: var(--profile-bg);
+    padding: 15px;
+    padding-bottom: 95px;
+}
+
 .logout-btn {
-    width: calc(100% - 30px);
-    margin: 15px 15px 20px;
+    width: 100%;
     background-color: var(--logout-red);
     color: white;
     border: none;
@@ -343,20 +343,24 @@ header h1 {
 /* Bottom Nav */
 .bottom-nav {
     position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 400px;
-    background-color: #0a0a0a;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    z-index: 998;
+    width: calc(100% - 20px);
+    height: 71px;
+    background: #0D1306;
     display: flex;
-    justify-content: space-around;
-    padding: 10px 0 8px;
-    border-top: 1px solid #1a1a1a;
+    justify-content: space-around; /* Distribuye los items equitativamente */
+    align-items: center; /* Centra verticalmente los nav-items */
+    border-radius: 16px;
+    box-sizing: border-box;
+    overflow: visible; /* Cambiado a visible para que el icono activo pueda sobresalir */
+    box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.16);
 }
 
 .nav-item {
-    text-align: center;
     color: var(--text-gray);
     font-size: 0.65rem;
     position: relative;
@@ -365,34 +369,39 @@ header h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center; /* Centra contenido verticalmente */
+    height: 100%; /* Ocupa todo el alto de la barra */
 }
 
 .nav-item i {
-    width: 22px;
-    height: 22px;
-    display: block;
+    font-size: 20px; /* Tamaño del icono */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 32px; /* Altura fija para el contenedor del icono */
     margin-bottom: 4px;
+    transition: all 0.3s ease; /* Suaviza el cambio al estado activo */
 }
 
 .nav-item.active-nav {
-    color: var(--text-white);
+    color: #ffffff; /* O var(--text-white) */
 }
 
 .nav-item.active-nav i {
-    background-color: var(--primary-green);
+    background-color: #87C349; /* Tu primary-green */
     border-radius: 50%;
-    padding: 8px;
-    width: 38px;
-    height: 38px;
-    margin-top: -15px;
-    margin-bottom: 2px;
+    width: 45px;  /* Tamaño del círculo */
+    height: 45px;
+    margin-top: -35px; /* Lo eleva para que sobresalga de la barra */
+    margin-bottom: 5px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .badge {
     position: absolute;
-    top: -2px;
+    top: 5px; /* Ajustado para que no flote tanto */
     right: 50%;
-    transform: translateX(12px);
+    transform: translateX(18px); /* Ajustado según el nuevo ancho */
     background: #e53935;
     color: white;
     font-size: 0.55rem;
@@ -404,6 +413,7 @@ header h1 {
     align-items: center;
     justify-content: center;
     font-weight: 600;
+    z-index: 10;
 }
 
 /* Mobile responsive */
