@@ -97,6 +97,32 @@ function renderProducts() {
             </div>
         </div>
     `).join('');
+    
+    // Update grand total after rendering
+    updateGrandTotal();
+}
+
+// Calculate and update grand total (shipping + products)
+function updateGrandTotal() {
+    const grandTotalEl = document.getElementById('ov-grand-total');
+    if (!grandTotalEl) return;
+    
+    // Get shipping total from localStorage or DOM
+    const savedData = localStorage.getItem('parcelData');
+    let shippingTotal = 0;
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        shippingTotal = parseFloat(data.totalYen) || 0;
+    }
+    
+    // Sum all product prices
+    const productsTotal = products.reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0);
+    
+    // Grand total
+    const conversionYen = 6.96;
+    const grandTotal = shippingTotal + productsTotal
+    const usdTotal = grandTotal / conversionYen;
+    grandTotalEl.textContent = `¥ ${grandTotal.toFixed(0)} ($ ${usdTotal.toFixed(0)})`;
 }
 
 // Render product forms in editor
