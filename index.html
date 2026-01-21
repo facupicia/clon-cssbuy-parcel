@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CSSbuy</title>
+    <link rel="icon" type="image/x-icon" href="media/favicon.ico">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="mobile-container">
+        <header>
+            <h1>Your Account</h1>
+        </header>
+
+        <main>
+            <section class="profile-section">
+                <div class="avatar">
+                    <img src="media/user.webp" alt="User Avatar">
+                </div>
+                <h2 class="username">cufassj</h2>
+                <div class="rating">
+                    <span class="star active">★</span>
+                    <span class="star active">★</span>
+                    <span class="star active">★</span>
+                    <span class="star active">★</span>
+                    <span class="star active">★</span>
+                    <span class="star active">★</span>
+                    <span class="star">★</span>
+                    <span class="plus-icon">+</span>
+                </div>
+                <p class="validity">Validity To : Permanent</p>
+
+                <div class="balance-container">
+                    <p class="account-label">My Account</p>
+                    <p class="balance">¥12.78 <span>($1.84)</span></p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-recharge">
+                        <img src="media/deposit.svg" class="btn-icon" alt="Recharge">
+                        Recharge
+                    </button>
+                    <button class="btn-refund">
+                        <img src="media/withdrawal.svg" class="btn-icon" alt="Refund">
+                        Refund
+                    </button>
+                </div>
+
+                <div class="stats-card">
+                    <div class="stat-row">
+                        <span>Commission</span>
+                        <span class="stat-value">¥ 0.00 ($0.00)</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Bonus points</span>
+                        <span class="stat-value">3810</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="menu-grid-fuera">
+                <section class="menu-grid">
+                    <div class="menu-item">
+                        <div class="icon-box"><img src="media/pending.svg" alt="Orders"></div>
+                        <span>Orders</span>
+                    </div>
+                    <a href="my-parcels.html" class="menu-item" id="my-parcel-btn">
+                        <div class="icon-box"><img src="media/parclels.svg" alt="My Parcels"></div>
+                        <span>My Parcels</span>
+                    </a>
+                    <div class="menu-item">
+                        <div class="icon-box"><img src="media/wallet.svg" alt="Records"></div>
+                        <span>Records</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="icon-box"><img src="media/coupon.svg" alt="Coupons"></div>
+                        <span>Coupons</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="icon-box"><img src="media/loyalty.svg" alt="My Points"></div>
+                        <span>My Points</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="icon-box"><img src="media/iconsu..svg" alt="Consultation"></div>
+                        <span>Consultation</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="icon-box"><img src="media/thumbsup.svg" alt="Reviews"></div>
+                        <span>Reviews</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="icon-box"><img src="media/set.svg" alt="Setting"></div>
+                        <span>Setting</span>
+                    </div>
+                </section>
+            </div>
+            <section class="fee-authorization">
+                <h3>Parcel fee adjustment authorization</h3>
+                <p>The package's weight (especially volume weight) will differ after packaging, which may lead to
+                    additional shipping fees. Please select an authorized amount below. If the extra charges are under
+                    the authorised amount, and your account has enough balance, the necessary charges will be deducted
+                    automatically.</p>
+
+                <div class="amount-grid">
+                    <button class="amount-btn active-amount">$7.19</button>
+                    <button class="amount-btn">$14.39</button>
+                    <button class="amount-btn">$28.78</button>
+                    <button class="amount-btn">$71.94</button>
+                    <button class="amount-btn">$143.88</button>
+                    <button class="amount-btn">$287.77</button>
+                </div>
+            </section>
+
+            <button class="logout-btn">Logout</button>
+        </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item">
+                <img src="iconos-menu/homeactive.svg" alt="Home" class="nav-icon">
+                <span>Home</span>
+            </div>
+            <div class="nav-item">
+                <div class="badge">0</div>
+                <img src="iconos-menu/notificationsactive.svg" alt="Notices" class="nav-icon">
+                <span>Notices</span>
+            </div>
+            <div class="nav-item">
+                <img src="iconos-menu/cartactive.svg" alt="Cart" class="nav-icon">
+                <span>Cart</span>
+            </div>
+            <div class="nav-item active-nav">
+                <img src="iconos-menu/useractive.svg" alt="Profile" class="nav-icon">
+                <span>Profile</span>
+            </div>
+        </nav>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

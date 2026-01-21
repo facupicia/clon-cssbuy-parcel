@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Settings</title>
+    <link rel="icon" type="image/x-icon" href="media/favicon.ico">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="mobile-container">
+        <header class="header-with-back">
+            <a href="index.html" class="back-btn">
+                <i data-lucide="arrow-left"></i>
+            </a>
+            <h1>Settings</h1>
+        </header>
+
+        <main class="settings-main">
+            <section class="settings-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" value="cufassj" placeholder="Enter username">
+                </div>
+
+                <div class="form-group">
+                    <label for="balance-yen">Balance (¥)</label>
+                    <input type="number" id="balance-yen" value="12.78" step="0.01" placeholder="Enter balance in ¥">
+                </div>
+
+                <div class="form-group">
+                    <label for="balance-usd">Balance ($)</label>
+                    <input type="number" id="balance-usd" value="1.84" step="0.01" placeholder="Enter balance in $">
+                </div>
+
+                <button class="save-btn" id="save-settings">Save Changes</button>
+            </section>
+
+            <div class="settings-info">
+                <p>Changes will be saved locally and applied when you return to your account page.</p>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item">
+                <img src="iconos-menu/homeactive.svg" alt="Home" class="nav-icon">
+                <span>Home</span>
+            </div>
+            <div class="nav-item">
+                <div class="badge">0</div>
+                <img src="iconos-menu/notificationsactive.svg" alt="Notices" class="nav-icon">
+                <span>Notices</span>
+            </div>
+            <div class="nav-item">
+                <img src="iconos-menu/cartactive.svg" alt="Cart" class="nav-icon">
+                <span>Cart</span>
+            </div>
+            <div class="nav-item active-nav">
+                <img src="iconos-menu/useractive.svg" alt="Profile" class="nav-icon">
+                <span>Profile</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const conversionYen = 6.96;
+
+        // Load saved settings
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUsername = localStorage.getItem('username');
+            const savedBalanceYen = localStorage.getItem('balanceYen');
+            const savedBalanceUsd = localStorage.getItem('balanceUsd');
+
+            if (savedUsername) document.getElementById('username').value = savedUsername;
+            if (savedBalanceYen) document.getElementById('balance-yen').value = savedBalanceYen;
+            if (savedBalanceUsd) document.getElementById('balance-usd').value = savedBalanceUsd;
+
+            // Auto-calculate yen when usd changes
+            document.getElementById('balance-usd').addEventListener('input', (e) => {
+                const usdValue = parseFloat(e.target.value) || 0;
+                const yenValue = (usdValue * conversionYen).toFixed(2);
+                document.getElementById('balance-yen').value = yenValue;
+            });
+        });
+
+        // Save settings
+        document.getElementById('save-settings').addEventListener('click', () => {
+            const username = document.getElementById('username').value;
+            const balanceUsd = parseFloat(document.getElementById('balance-usd').value) || 0;
+            const balanceYen = (balanceUsd * conversionYen).toFixed(2);
+
+            localStorage.setItem('username', username);
+            localStorage.setItem('balanceYen', balanceYen);
+            localStorage.setItem('balanceUsd', balanceUsd.toFixed(2));
+
+            alert('Settings saved successfully!');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+
+</html>
