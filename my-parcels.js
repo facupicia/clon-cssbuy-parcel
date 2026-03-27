@@ -599,15 +599,16 @@ function extractItemsFromText(text) {
 
 // Convert extracted items to product format for the app
 // Creates multiple products based on quantity (cantidad)
+// Each product has the full unit price (NOT divided)
 // Uses random Chinese names like the original app
 function convertToProducts(items) {
     const products = [];
     
     items.forEach((item) => {
-        // Calculate unit price with 2 decimal precision
-        const unitPrice = Math.round((item.precioUsd / item.cantidad) * 100) / 100;
+        // The price in the PDF is per unit, not total
+        const unitPrice = Math.round(item.precioUsd * 100) / 100;
         
-        // Create N products based on quantity
+        // Create N products based on quantity, each with the full unit price
         for (let i = 0; i < item.cantidad; i++) {
             products.push({
                 orderId: generateOrderId(),
@@ -664,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Ask user if they want to replace or append
                 const shouldReplace = confirm(
                     `Se encontraron ${items.length} tipos de items (${totalUnidades} unidades totales):\n\n` +
-                    items.map(i => `• ${i.descripcion} (${i.cantidad} UN) - $${i.precioUsd}`).join('\n') +
+                    items.map(i => `• ${i.descripcion} - ${i.cantidad} UN x $${i.precioUsd} c/u`).join('\n') +
                     `\n\n¿Reemplazar los productos actuales? (Cancelar para agregarlos)`
                 );
                 
