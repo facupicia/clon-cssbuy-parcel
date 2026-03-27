@@ -74,6 +74,11 @@
                                     class="data-shipping-usd">$73.06</span>)</span>
                         </div>
                         <div class="row">
+                            <span class="label">Coupon:</span>
+                            <span class="value" style="color: #ff4d4f;">-¥ <span class="data-coupon-yen">0.00</span> (<span
+                                    class="data-coupon-usd">$0.00</span>)</span>
+                        </div>
+                        <div class="row">
                             <span class="label">Total:</span>
                             <span class="value total-green">¥ <span class="data-total-yen">426.32</span> (<span
                                     class="data-total-usd">$61.31</span>)</span>
@@ -317,6 +322,11 @@
                     <label>Shipping Fee ($):</label>
                     <input type="text" id="edit-shipping-usd">
                 </div>
+
+                <div class="form-group">
+                    <label>Coupon ($):</label>
+                    <input type="text" id="edit-coupon-usd">
+                </div>
                 <div class="form-group">
                     <label>Total (¥):</label>
                     <input type="text" id="edit-total-yen">
@@ -383,6 +393,10 @@
                     <div class="detail-row">
                         <span class="detail-label">service</span>
                         <span class="detail-value">¥ 18.32</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Coupon</span>
+                        <span class="detail-value" style="color: #ff4d4f;" id="ov-coupon">-¥ 0.00</span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Insured amount</span>

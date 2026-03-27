@@ -110,31 +110,43 @@ function updateGrandTotal() {
     // Get shipping total from localStorage or DOM
     let shippingTotalYen = 0;
     let shippingTotalUsd = 0;
+    let couponTotalYen = 0;
+    let couponTotalUsd = 0;
+    const conversionYen = 6.96;
     
     const savedData = localStorage.getItem('parcelData');
     if (savedData) {
         const data = JSON.parse(savedData);
         shippingTotalYen = parseFloat(data.totalYen) || 0;
         shippingTotalUsd = parseFloat(String(data.totalUsd).replace(/[^0-9.]/g, '')) || 0;
+        couponTotalUsd = parseFloat(String(data.couponUsd).replace(/[^0-9.]/g, '')) || 0;
     } else {
         const totalYenEl = document.querySelector(".data-total-yen");
         const totalUsdEl = document.querySelector(".data-total-usd");
+       
         if (totalYenEl) shippingTotalYen = parseFloat(totalYenEl.textContent) || 0;
         if (totalUsdEl) shippingTotalUsd = parseFloat(totalUsdEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+        
+        const couponUsdEl = document.querySelector(".data-coupon-usd");
+        if (couponUsdEl) couponTotalUsd = parseFloat(couponUsdEl.textContent.replace(/[^0-9.]/g, '')) || 0;
     }
+    
+    couponTotalYen = couponTotalUsd * conversionYen;
     
     // Sum all product prices (now in USD)
     const productsTotalUsd = products.reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0);
     
     // Grand total
-    const conversionYen = 6.96;
     const productsTotalYen = productsTotalUsd * conversionYen;
     
-    const grandTotalYen = shippingTotalYen + productsTotalYen;
-    const grandTotalUsd = shippingTotalUsd + productsTotalUsd;
+    // Subtract coupon from the shipping base
+    const effectiveShippingYen = shippingTotalYen - couponTotalYen;
+    const effectiveShippingUsd = shippingTotalUsd - couponTotalUsd;
+    
+    const grandTotalYen = effectiveShippingYen + productsTotalYen;
+    const grandTotalUsd = effectiveShippingUsd + productsTotalUsd;
     
     grandTotalEl.textContent = `¥ ${grandTotalYen.toFixed(2)} ($${grandTotalUsd.toFixed(2)})`;
-}
 
 // Render product forms in editor
 function renderProductForms() {
@@ -258,6 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
         date: editableCard?.querySelector('.data-date'),
         shippingYen: editableCard?.querySelector('.data-shipping-yen'),
         shippingUsd: editableCard?.querySelector('.data-shipping-usd'),
+        couponYen: editableCard?.querySelector('.data-coupon-yen'),
+        couponUsd: editableCard?.querySelector('.data-coupon-usd'),
         totalYen: editableCard?.querySelector('.data-total-yen'),
         totalUsd: editableCard?.querySelector('.data-total-usd'),
         insurance: editableCard?.querySelector('.data-insurance'),
@@ -278,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         date: document.getElementById('edit-date'),
         shippingYen: document.getElementById('edit-shipping-yen'),
         shippingUsd: document.getElementById('edit-shipping-usd'),
+        couponUsd: document.getElementById('edit-coupon-usd'),
         totalYen: document.getElementById('edit-total-yen'),
         totalUsd: document.getElementById('edit-total-usd'),
         tracking: document.getElementById('edit-tracking'),
@@ -295,7 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
         city: document.getElementById('ov-city'),
         address: document.getElementById('ov-address'),
         recipient: document.getElementById('ov-recipient'),
-        zip: document.getElementById('ov-zip')
+        zip: document.getElementById('ov-zip'),
+        coupon: document.getElementById('ov-coupon')
     };
 
     // Load saved data from localStorage on page load
@@ -312,6 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dataElements.date && data.date) dataElements.date.textContent = data.date;
             if (dataElements.shippingYen && data.shippingYen) dataElements.shippingYen.textContent = data.shippingYen;
             if (dataElements.shippingUsd && data.shippingUsd) dataElements.shippingUsd.textContent = data.shippingUsd;
+            if (dataElements.couponYen && data.couponYen !== undefined) dataElements.couponYen.textContent = data.couponYen;
+            if (dataElements.couponUsd && data.couponUsd !== undefined) dataElements.couponUsd.textContent = data.couponUsd;
             if (dataElements.totalYen && data.totalYen) dataElements.totalYen.textContent = data.totalYen;
             if (dataElements.totalUsd && data.totalUsd) dataElements.totalUsd.textContent = data.totalUsd;
             if (dataElements.insurance && data.insurance) dataElements.insurance.textContent = data.insurance;
@@ -328,6 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (addressElements.address && data.address) addressElements.address.textContent = data.address;
             if (addressElements.recipient && data.recipient) addressElements.recipient.textContent = data.recipient;
             if (addressElements.zip && data.zip) addressElements.zip.textContent = data.zip;
+            if (addressElements.coupon && data.couponYen !== undefined) addressElements.coupon.textContent = `-¥ ${data.couponYen}`;
         }
     };
 
@@ -342,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputs.date) inputs.date.value = dataElements.date?.textContent || '';
         if (inputs.shippingYen) inputs.shippingYen.value = dataElements.shippingYen?.textContent || '';
         if (inputs.shippingUsd) inputs.shippingUsd.value = dataElements.shippingUsd?.textContent || '';
+        if (inputs.couponUsd) inputs.couponUsd.value = dataElements.couponUsd?.textContent || '';
         if (inputs.totalYen) inputs.totalYen.value = dataElements.totalYen?.textContent || '';
         if (inputs.totalUsd) inputs.totalUsd.value = dataElements.totalUsd?.textContent || '';
         if (inputs.tracking) inputs.tracking.value = dataElements.tracking?.textContent || '';
@@ -366,9 +386,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dataElements.volume) dataElements.volume.textContent = inputs.volume.value;
         if (dataElements.oldWeight) dataElements.oldWeight.textContent = inputs.oldWeight.value;
         if (dataElements.weight) dataElements.weight.textContent = inputs.weight.value;
+        const couponUsdVal = parseFloat(inputs.couponUsd?.value) || 0;
+        const couponYenVal = (couponUsdVal * 6.96).toFixed(2);
+        
         if (dataElements.date) dataElements.date.textContent = inputs.date.value;
         if (dataElements.shippingYen) dataElements.shippingYen.textContent = inputs.shippingYen.value;
         if (dataElements.shippingUsd) dataElements.shippingUsd.textContent = inputs.shippingUsd.value;
+        if (dataElements.couponYen) dataElements.couponYen.textContent = couponYenVal;
+        if (dataElements.couponUsd) dataElements.couponUsd.textContent = couponUsdVal.toFixed(2);
         if (dataElements.totalYen) dataElements.totalYen.textContent = inputs.totalYen.value;
         if (dataElements.totalUsd) dataElements.totalUsd.textContent = inputs.totalUsd.value;
         if (dataElements.tracking) dataElements.tracking.textContent = inputs.tracking.value;
@@ -379,6 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (addressElements.address) addressElements.address.textContent = inputs.address.value;
         if (addressElements.recipient) addressElements.recipient.textContent = inputs.recipient.value;
         if (addressElements.zip) addressElements.zip.textContent = inputs.zip.value;
+        if (addressElements.coupon) addressElements.coupon.textContent = `-¥ ${couponYenVal}`;
         
         // Save to localStorage
         const dataToSave = {
@@ -390,6 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
             date: inputs.date?.value,
             shippingYen: inputs.shippingYen?.value,
             shippingUsd: inputs.shippingUsd?.value,
+            couponYen: couponYenVal,
+            couponUsd: couponUsdVal.toFixed(2),
             totalYen: inputs.totalYen?.value,
             totalUsd: inputs.totalUsd?.value,
             insurance: dataElements.insurance?.textContent,
