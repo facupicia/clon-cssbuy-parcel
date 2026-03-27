@@ -30,7 +30,7 @@ let products = [
         weight: 'With Box524g/Without Box 524g',
         imageUrl: 'media/no_item_img.webp',
         name: '潘家多拉S925纯银心形闪耀许愿星链扣头蛇骨链手链新品DIY配件',
-        price: 49.90
+        price: 7.17
     },
     {
         orderId: 'O250703083745',
@@ -38,7 +38,7 @@ let products = [
         weight: 'With Box1681g/Without Box 1681g',
         imageUrl: 'media/no_item_img.webp',
         name: '2024新款秋冬季加厚羊毛衫男士圆领针织衫保暖毛衣外套休闲',
-        price: 109.00
+        price: 15.66
     },
     {
         orderId: 'O250706418565',
@@ -46,7 +46,7 @@ let products = [
         weight: 'With Box232g/Without Box 232g',
         imageUrl: 'media/no_item_img.webp',
         name: '高品质纯棉短袖T恤男女同款潮牌印花宽松休闲百搭情侣装',
-        price: 55.00
+        price: 7.90
     }
 ];
 
@@ -92,7 +92,7 @@ function renderProducts() {
                 </div>
             </div>
             <div class="product-footer">
-                <span class="product-price">¥ ${p.price.toFixed(2)}</span>
+                <span class="product-price">¥ ${(parseFloat(p.price) * 6.96).toFixed(2)}</span>
                 <span class="product-qty">x1</span>
             </div>
         </div>
@@ -108,21 +108,32 @@ function updateGrandTotal() {
     if (!grandTotalEl) return;
     
     // Get shipping total from localStorage or DOM
+    let shippingTotalYen = 0;
+    let shippingTotalUsd = 0;
+    
     const savedData = localStorage.getItem('parcelData');
-    let shippingTotal = 0;
     if (savedData) {
         const data = JSON.parse(savedData);
-        shippingTotal = parseFloat(data.totalYen) || 0;
+        shippingTotalYen = parseFloat(data.totalYen) || 0;
+        shippingTotalUsd = parseFloat(String(data.totalUsd).replace(/[^0-9.]/g, '')) || 0;
+    } else {
+        const totalYenEl = document.querySelector(".data-total-yen");
+        const totalUsdEl = document.querySelector(".data-total-usd");
+        if (totalYenEl) shippingTotalYen = parseFloat(totalYenEl.textContent) || 0;
+        if (totalUsdEl) shippingTotalUsd = parseFloat(totalUsdEl.textContent.replace(/[^0-9.]/g, '')) || 0;
     }
     
-    // Sum all product prices
-    const productsTotal = products.reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0);
+    // Sum all product prices (now in USD)
+    const productsTotalUsd = products.reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0);
     
     // Grand total
     const conversionYen = 6.96;
-    const grandTotal = shippingTotal + productsTotal
-    const usdTotal = grandTotal / conversionYen;
-    grandTotalEl.textContent = `¥ ${grandTotal.toFixed(0)} ($ ${usdTotal.toFixed(0)})`;
+    const productsTotalYen = productsTotalUsd * conversionYen;
+    
+    const grandTotalYen = shippingTotalYen + productsTotalYen;
+    const grandTotalUsd = shippingTotalUsd + productsTotalUsd;
+    
+    grandTotalEl.textContent = `¥ ${grandTotalYen.toFixed(2)} ($${grandTotalUsd.toFixed(2)})`;
 }
 
 // Render product forms in editor
@@ -145,7 +156,7 @@ function renderProductForms() {
                 <textarea data-field="name">${p.name}</textarea>
             </div>
             <div class="form-group">
-                <label>Price (¥):</label>
+                <label>Price ($):</label>
                 <input type="number" value="${p.price}" step="0.01" data-field="price">
             </div>
         </div>
