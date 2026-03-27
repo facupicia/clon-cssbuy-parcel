@@ -147,6 +147,7 @@ function updateGrandTotal() {
     const grandTotalUsd = effectiveShippingUsd + productsTotalUsd;
     
     grandTotalEl.textContent = `¥ ${grandTotalYen.toFixed(2)} ($${grandTotalUsd.toFixed(2)})`;
+}
 
 // Render product forms in editor
 function renderProductForms() {
