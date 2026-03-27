@@ -54,14 +54,24 @@ let products = [
 function loadProducts() {
     const saved = localStorage.getItem('parcelProducts');
     if (saved) {
-        products = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Ensure all prices are numbers with 2 decimals
+        products = parsed.map(p => ({
+            ...p,
+            price: Math.round((parseFloat(p.price) || 0) * 100) / 100
+        }));
     }
     renderProducts();
 }
 
 // Save products to localStorage
 function saveProducts() {
-    localStorage.setItem('parcelProducts', JSON.stringify(products));
+    // Ensure all prices are numbers with 2 decimals before saving
+    const cleanProducts = products.map(p => ({
+        ...p,
+        price: Math.round((parseFloat(p.price) || 0) * 100) / 100
+    }));
+    localStorage.setItem('parcelProducts', JSON.stringify(cleanProducts));
 }
 
 // Render products in the overlay
@@ -594,6 +604,9 @@ function convertToProducts(items) {
     const products = [];
     
     items.forEach((item) => {
+        // Calculate unit price with 2 decimal precision
+        const unitPrice = Math.round((item.precioUsd / item.cantidad) * 100) / 100;
+        
         // Create N products based on quantity
         for (let i = 0; i < item.cantidad; i++) {
             products.push({
@@ -602,7 +615,7 @@ function convertToProducts(items) {
                 weight: `With Box0g/Without Box 0g`,
                 imageUrl: 'media/no_item_img.webp',
                 name: getRandomChineseName(),
-                price: item.precioUsd / item.cantidad // Divide price equally among items
+                price: unitPrice
             });
         }
     });
