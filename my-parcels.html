@@ -8,6 +8,10 @@
     <link rel="icon" type="image/x-icon" href="media/favicon.ico">
     <link rel="stylesheet" href="my-parcels.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
 </head>
 
 <body>
@@ -119,9 +123,14 @@
 
                 <div class="card-actions">
                     <button class="icon-btn"><i data-lucide="more-horizontal"></i></button>
-                    <button class="action-btn">Contact support</button>
+                    <button class="action-btn" id="contact-support-btn">Contact support</button>
                     <button class="action-btn" id="edit-btn">Photos</button>
                     <button class="action-btn" id="track-btn">Track</button>
+                </div>
+
+                <!-- PDF Import Section (hidden) -->
+                <div class="pdf-import-section" style="display: none;">
+                    <input type="file" id="pdf-input" accept=".pdf">
                 </div>
             </div>
 

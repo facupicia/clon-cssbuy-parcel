@@ -472,3 +472,195 @@ function toggleDetails(header) {
         detailsBody.classList.toggle('collapsed');
     }
 }
+
+// ==================== PDF PARSER ====================
+
+// Parse AFIP declaration PDF and extract items
+async function parsePdfDeclaration(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    let fullText = '';
+    
+    // Extract text from all pages
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + ' ';
+    }
+    
+    return extractItemsFromText(fullText);
+}
+
+// Extract items from the parsed text using regex patterns
+function extractItemsFromText(text) {
+    const items = [];
+    
+    // Normalize text: remove extra spaces and newlines
+    const normalizedText = text.replace(/\s+/g, ' ').trim();
+    
+    // Common rubros in AFIP declarations
+    const rubros = [
+        'Bijouterie',
+        'Calzado', 
+        'Ropa de vestir y deporte',
+        'Juguetes',
+        'Electrónica',
+        'Accesorios',
+        'Hogar',
+        'Deportes',
+        'Cosmética',
+        'Alimentos',
+        'Libros',
+        'Instrumentos musicales',
+        'Artículos de pesca',
+        'Artículos de camping'
+    ];
+    
+    // Find ALL sections that contain items (there may be multiple in multi-page PDFs)
+    // Each section starts with "ITEMS QUE COMPONEN EL ENVÍO" and ends before "CONTROLES Y LIQUIDACIONES"
+    const sectionPattern = /ITEMS QUE COMPONEN EL ENV[ÍI]O.*?RUBRO\s+DESCRIPCI[ÓO]N\s+CANT\.?\s*UNID\.?\s+IMPORTE \(USD\)(.*?)(?:CONTROLES|UTILIZA|CANTIDAD DE [ÍI]TEMS|DERECHO DE IMPORTACI[ÓO]N)/gi;
+    
+    let sectionMatch;
+    while ((sectionMatch = sectionPattern.exec(normalizedText)) !== null) {
+        const itemsSection = sectionMatch[1].trim();
+        
+        // Create a pattern that matches: RUBRO + description + number + UN + price
+        const itemPattern = new RegExp(
+            `(${rubros.join('|')})\\s+(.*?)\\s+(\\d+)\\s*UN\\s+(\\d+(?:\\.\\d+)?)`,
+            'gi'
+        );
+        
+        let match;
+        while ((match = itemPattern.exec(itemsSection)) !== null) {
+            const [, rubro, descripcion, cantidad, precio] = match;
+            items.push({
+                rubro: rubro.trim(),
+                descripcion: descripcion.trim(),
+                cantidad: parseInt(cantidad),
+                precioUsd: parseFloat(precio)
+            });
+        }
+    }
+    
+    // Fallback: try a more generic pattern if no items found
+    if (items.length === 0) {
+        // Look for patterns like: "text description 2 UN 5.0"
+        const genericPattern = /([A-Za-záéíóúñÁÉÍÓÚÑ\s]+?)\s+(\d+)\s*UN\s+(\d+(?:\.\d+)?)/gi;
+        let match;
+        while ((match = genericPattern.exec(normalizedText)) !== null) {
+            const [fullMatch, descripcion, cantidad, precio] = match;
+            // Filter out false positives (too short descriptions)
+            if (descripcion.trim().length > 3 && !descripcion.includes('CANT')) {
+                items.push({
+                    rubro: 'General',
+                    descripcion: descripcion.trim(),
+                    cantidad: parseInt(cantidad),
+                    precioUsd: parseFloat(precio)
+                });
+            }
+        }
+    }
+    
+    return items;
+}
+
+// Convert extracted items to product format for the app
+// Creates multiple products based on quantity (cantidad)
+// Uses random Chinese names like the original app
+function convertToProducts(items) {
+    const products = [];
+    
+    items.forEach((item) => {
+        // Create N products based on quantity
+        for (let i = 0; i < item.cantidad; i++) {
+            products.push({
+                orderId: generateOrderId(),
+                storeName: 'taobao',
+                weight: `With Box0g/Without Box 0g`,
+                imageUrl: 'media/no_item_img.webp',
+                name: getRandomChineseName(),
+                price: item.precioUsd / item.cantidad // Divide price equally among items
+            });
+        }
+    });
+    
+    return products;
+}
+
+// Handle PDF file selection
+document.addEventListener('DOMContentLoaded', () => {
+    const pdfInput = document.getElementById('pdf-input');
+    const contactSupportBtn = document.getElementById('contact-support-btn');
+    
+    // Camouflaged: Contact support button triggers PDF upload
+    if (contactSupportBtn && pdfInput) {
+        contactSupportBtn.addEventListener('click', () => {
+            pdfInput.click();
+        });
+    }
+    
+    if (pdfInput) {
+        pdfInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Show loading state
+            const originalContent = pdfImportSection.innerHTML;
+            pdfImportSection.innerHTML = `
+                <div class="pdf-loading">
+                    <i data-lucide="loader-2"></i>
+                    <span>Procesando PDF...</span>
+                </div>
+            `;
+            lucide.createIcons();
+            
+            try {
+                const items = await parsePdfDeclaration(file);
+                
+                if (items.length === 0) {
+                    alert('No se encontraron items en el PDF. Verificá que sea una declaración de AFIP/Correo Argentino.');
+                    pdfImportSection.innerHTML = originalContent;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Convert to products and add to existing ones
+                const newProducts = convertToProducts(items);
+                const totalUnidades = items.reduce((sum, i) => sum + i.cantidad, 0);
+                
+                // Ask user if they want to replace or append
+                const shouldReplace = confirm(
+                    `Se encontraron ${items.length} tipos de items (${totalUnidades} unidades totales):\n\n` +
+                    items.map(i => `• ${i.descripcion} (${i.cantidad} UN) - $${i.precioUsd}`).join('\n') +
+                    `\n\n¿Reemplazar los productos actuales? (Cancelar para agregarlos)`
+                );
+                
+                if (shouldReplace) {
+                    products = newProducts;
+                } else {
+                    products = [...products, ...newProducts];
+                }
+                
+                saveProducts();
+                
+                // Open the products editor to show the imported items
+                openProductsEditor();
+                
+                // Restore the import section
+                pdfImportSection.innerHTML = originalContent;
+                lucide.createIcons();
+                
+            } catch (error) {
+                console.error('Error parsing PDF:', error);
+                alert('Error al procesar el PDF: ' + error.message);
+                pdfImportSection.innerHTML = originalContent;
+                lucide.createIcons();
+            }
+            
+            // Reset input
+            pdfInput.value = '';
+        });
+    }
+});

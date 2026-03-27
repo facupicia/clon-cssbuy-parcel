@@ -606,3 +606,25 @@ body {
 .product-form textarea:focus {
     border-color: var(--primary-green);
 }
+
+/* PDF Import Section (hidden) */
+.pdf-import-section {
+    display: none;
+}
+
+.pdf-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-green);
+    font-size: 0.85rem;
+}
+
+.pdf-loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
