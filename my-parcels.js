@@ -170,7 +170,7 @@ function renderProductForms() {
             </div>
             <div class="form-group">
                 <label>Price ($):</label>
-                <input type="number" value="${p.price}" step="0.01" data-field="price">
+                <input type="number" value="${parseFloat(p.price).toFixed(2)}" step="0.01" data-field="price">
             </div>
         </div>
     `).join('');
@@ -208,8 +208,12 @@ function saveProductsFromForms() {
         };
         form.querySelectorAll('input, textarea').forEach(input => {
             const field = input.dataset.field;
-            let value = input.value;
-            if (field === 'price') value = parseFloat(value) || 0;
+            let value = input.value.trim();
+            if (field === 'price') {
+                // Ensure price is parsed correctly with 2 decimal places
+                const parsedPrice = parseFloat(value);
+                value = isNaN(parsedPrice) ? 0 : Math.round(parsedPrice * 100) / 100;
+            }
             product[field] = value;
         });
         newProducts.push(product);
@@ -291,11 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
         oldWeight: document.getElementById('edit-old-weight'),
         weight: document.getElementById('edit-weight'),
         date: document.getElementById('edit-date'),
-        shippingYen: document.getElementById('edit-shipping-yen'),
-        shippingUsd: document.getElementById('edit-shipping-usd'),
         couponUsd: document.getElementById('edit-coupon-usd'),
-        totalYen: document.getElementById('edit-total-yen'),
         totalUsd: document.getElementById('edit-total-usd'),
+        totalYen: document.getElementById('edit-total-yen'),
         tracking: document.getElementById('edit-tracking'),
         // Address fields
         country: document.getElementById('edit-country'),
@@ -304,6 +306,9 @@ document.addEventListener('DOMContentLoaded', () => {
         recipient: document.getElementById('edit-recipient'),
         zip: document.getElementById('edit-zip')
     };
+    
+    // Conversion rate USD to YEN
+    const USD_TO_YEN = 6.96;
     
     // Address overlay elements
     const addressElements = {
@@ -360,11 +365,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputs.oldWeight) inputs.oldWeight.value = dataElements.oldWeight?.textContent || '';
         if (inputs.weight) inputs.weight.value = dataElements.weight?.textContent || '';
         if (inputs.date) inputs.date.value = dataElements.date?.textContent || '';
-        if (inputs.shippingYen) inputs.shippingYen.value = dataElements.shippingYen?.textContent || '';
-        if (inputs.shippingUsd) inputs.shippingUsd.value = dataElements.shippingUsd?.textContent || '';
-        if (inputs.couponUsd) inputs.couponUsd.value = dataElements.couponUsd?.textContent || '';
-        if (inputs.totalYen) inputs.totalYen.value = dataElements.totalYen?.textContent || '';
-        if (inputs.totalUsd) inputs.totalUsd.value = dataElements.totalUsd?.textContent || '';
+        
+        // Parse values, removing any non-numeric characters except dots
+        const couponUsdText = dataElements.couponUsd?.textContent?.replace(/[^0-9.]/g, '') || '0';
+        const totalUsdText = dataElements.totalUsd?.textContent?.replace(/[^0-9.]/g, '') || '0';
+        
+        if (inputs.couponUsd) inputs.couponUsd.value = couponUsdText;
+        if (inputs.totalUsd) inputs.totalUsd.value = totalUsdText;
+        
+        // Auto-calculate yen from USD
+        const totalUsdVal = parseFloat(totalUsdText) || 0;
+        const totalYenVal = (totalUsdVal * USD_TO_YEN).toFixed(2);
+        if (inputs.totalYen) inputs.totalYen.value = totalYenVal;
+        
         if (inputs.tracking) inputs.tracking.value = dataElements.tracking?.textContent || '';
         
         // Populate address
@@ -376,6 +389,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         modal.classList.remove('hidden');
     };
+    
+    // Auto-calculate yen when USD total changes
+    if (inputs.totalUsd) {
+        inputs.totalUsd.addEventListener('input', () => {
+            const usdVal = parseFloat(inputs.totalUsd.value) || 0;
+            if (inputs.totalYen) inputs.totalYen.value = (usdVal * USD_TO_YEN).toFixed(2);
+        });
+    }
 
     const closeModal = () => {
         modal.classList.add('hidden');
@@ -387,16 +408,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dataElements.volume) dataElements.volume.textContent = inputs.volume.value;
         if (dataElements.oldWeight) dataElements.oldWeight.textContent = inputs.oldWeight.value;
         if (dataElements.weight) dataElements.weight.textContent = inputs.weight.value;
+        
+        // Parse values safely
         const couponUsdVal = parseFloat(inputs.couponUsd?.value) || 0;
-        const couponYenVal = (couponUsdVal * 6.96).toFixed(2);
+        const totalUsdVal = parseFloat(inputs.totalUsd?.value) || 0;
+        const couponYenVal = (couponUsdVal * USD_TO_YEN).toFixed(2);
+        const totalYenVal = (totalUsdVal * USD_TO_YEN).toFixed(2);
         
         if (dataElements.date) dataElements.date.textContent = inputs.date.value;
-        if (dataElements.shippingYen) dataElements.shippingYen.textContent = inputs.shippingYen.value;
-        if (dataElements.shippingUsd) dataElements.shippingUsd.textContent = inputs.shippingUsd.value;
         if (dataElements.couponYen) dataElements.couponYen.textContent = couponYenVal;
-        if (dataElements.couponUsd) dataElements.couponUsd.textContent = couponUsdVal.toFixed(2);
-        if (dataElements.totalYen) dataElements.totalYen.textContent = inputs.totalYen.value;
-        if (dataElements.totalUsd) dataElements.totalUsd.textContent = inputs.totalUsd.value;
+        if (dataElements.couponUsd) dataElements.couponUsd.textContent = `$${couponUsdVal.toFixed(2)}`;
+        if (dataElements.totalYen) dataElements.totalYen.textContent = totalYenVal;
+        if (dataElements.totalUsd) dataElements.totalUsd.textContent = `$${totalUsdVal.toFixed(2)}`;
         if (dataElements.tracking) dataElements.tracking.textContent = inputs.tracking.value;
         
         // Update address in overlay
@@ -415,12 +438,10 @@ document.addEventListener('DOMContentLoaded', () => {
             oldWeight: inputs.oldWeight?.value,
             weight: inputs.weight?.value,
             date: inputs.date?.value,
-            shippingYen: inputs.shippingYen?.value,
-            shippingUsd: inputs.shippingUsd?.value,
             couponYen: couponYenVal,
             couponUsd: couponUsdVal.toFixed(2),
-            totalYen: inputs.totalYen?.value,
-            totalUsd: inputs.totalUsd?.value,
+            totalYen: totalYenVal,
+            totalUsd: totalUsdVal.toFixed(2),
             insurance: dataElements.insurance?.textContent,
             package: dataElements.package?.textContent,
             tracking: inputs.tracking?.value,
