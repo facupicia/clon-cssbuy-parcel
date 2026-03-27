@@ -606,14 +606,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const file = e.target.files[0];
             if (!file) return;
             
-            // Show loading state
-            const originalContent = pdfImportSection.innerHTML;
-            pdfImportSection.innerHTML = `
-                <div class="pdf-loading">
-                    <i data-lucide="loader-2"></i>
-                    <span>Procesando PDF...</span>
-                </div>
-            `;
+            // Show loading on the button
+            const originalBtnText = contactSupportBtn.innerHTML;
+            contactSupportBtn.innerHTML = `<i data-lucide="loader-2" style="animation: spin 1s linear infinite;"></i> Cargando...`;
+            contactSupportBtn.disabled = true;
             lucide.createIcons();
             
             try {
@@ -621,7 +617,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (items.length === 0) {
                     alert('No se encontraron items en el PDF. Verificá que sea una declaración de AFIP/Correo Argentino.');
-                    pdfImportSection.innerHTML = originalContent;
+                    contactSupportBtn.innerHTML = originalBtnText;
+                    contactSupportBtn.disabled = false;
                     lucide.createIcons();
                     return;
                 }
@@ -648,16 +645,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Open the products editor to show the imported items
                 openProductsEditor();
                 
-                // Restore the import section
-                pdfImportSection.innerHTML = originalContent;
-                lucide.createIcons();
-                
             } catch (error) {
                 console.error('Error parsing PDF:', error);
                 alert('Error al procesar el PDF: ' + error.message);
-                pdfImportSection.innerHTML = originalContent;
-                lucide.createIcons();
             }
+            
+            // Restore button
+            contactSupportBtn.innerHTML = originalBtnText;
+            contactSupportBtn.disabled = false;
+            lucide.createIcons();
             
             // Reset input
             pdfInput.value = '';
