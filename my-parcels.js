@@ -1,15 +1,23 @@
-// Random Chinese product names
+// Product names mixing foreign trade titles (English/Spanish) with Chinese characters
 const chineseNames = [
-    '潘家多拉S925纯银心形闪耀许愿星链扣头蛇骨链手链新品DIY配件',
-    '2024新款秋冬季加厚羊毛衫男士圆领针织衫保暖毛衣外套休闲',
-    '高品质纯棉短袖T恤男女同款潮牌印花宽松休闲百搭情侣装',
-    '韩版时尚休闲运动鞋男女跑步鞋透气网面轻便舒适软底',
-    '新款智能手表心率血压监测防水多功能运动蓝牙手环',
-    '日系简约双肩包男女学生书包大容量旅行背包电脑包',
-    '高档真皮钱包男士短款牛皮钱夹商务休闲卡包零钱包',
-    '户外登山徒步鞋防滑耐磨透气运动鞋越野跑鞋男女款',
-    '复古文艺小众设计感项链锁骨链轻奢高级感饰品女',
-    '北欧风简约创意家居装饰摆件客厅书房办公桌面收纳'
+    'Trendy Foreign Trade Brand Mixed Emotion New Letter Embroidery 欧美复古高街刺绣短袖T恤',
+    'Cross-Border Foreign Trade American Retro Round-Neck T-Shirt 美式复古纯棉宽松半袖',
+    'HMP 2024新款高品质纯棉短袖T恤男女同款潮牌印花宽松休闲百搭情侣装',
+    'Marca de moda de comercio exterior 潮牌宽松 camiseta de manga corta con estampado callejero 男女同款',
+    'HMP Trendy Foreign Trade Brand Mixed Emotion New Letter Embroidery 字母刺绣圆领T恤',
+    'Cross-Border Foreign Trade American Retro Round-Neck T-Shirt 欧美重磅纯棉百搭打底衫',
+    'Marca de moda de comercio exterior HMP 外贸原单 camiseta de manga corta con estampado callejero',
+    'Trendy Foreign Trade Brand Mixed Emotion 街头潮牌字母刺绣短袖男女情侣装',
+    'HMP Cross-Border Foreign Trade American Retro Round-Neck T-Shirt 美式复古圆领短袖',
+    'Marca de moda de comercio exterior 复古水洗 camiseta de manga corta con estampado callejero',
+    'Trendy Foreign Trade Brand Mixed Emotion New Letter Embroidery 潘家S925纯银心形闪耀奢华配件',
+    'HMP 欧美高街重磅纯棉宽松 camiseta de manga corta con estampado callejero',
+    'Cross-Border Foreign Trade American Retro Round-Neck T-Shirt 2024新款男女同款潮牌休闲',
+    'Marca de moda de comercio exterior Trendy Foreign Trade Brand 经典刺绣圆领短袖',
+    'HMP 美式复古字母印花 Cross-Border Foreign Trade American Retro Round-Neck T-Shirt',
+    'Trendy Foreign Trade Brand Mixed Emotion 韩版时尚休闲运动男女跑步鞋透气轻便',
+    'Marca de moda de comercio exterior HMP 日系简约双肩包男女大容量旅行电脑包',
+    'Cross-Border Foreign Trade American Retro Round-Neck T-Shirt 户外复古防滑耐磨运动男女款'
 ];
 
 // Generate random order ID
@@ -17,7 +25,7 @@ function generateOrderId() {
     return 'O' + Math.floor(Math.random() * 9000000000 + 1000000000);
 }
 
-// Get random Chinese name
+// Get random Chinese/mixed name
 function getRandomChineseName() {
     return chineseNames[Math.floor(Math.random() * chineseNames.length)];
 }
@@ -29,7 +37,7 @@ let products = [
         storeName: 'taobao',
         weight: 'With Box524g/Without Box 524g',
         imageUrl: 'media/no_item_img.webp',
-        name: '潘家多拉S925纯银心形闪耀许愿星链扣头蛇骨链手链新品DIY配件',
+        name: 'Trendy Foreign Trade Brand Mixed Emotion New Letter Embroidery 欧美复古高街刺绣短袖T恤',
         price: 7.17
     },
     {
@@ -37,7 +45,7 @@ let products = [
         storeName: 'taobao',
         weight: 'With Box1681g/Without Box 1681g',
         imageUrl: 'media/no_item_img.webp',
-        name: '2024新款秋冬季加厚羊毛衫男士圆领针织衫保暖毛衣外套休闲',
+        name: 'HMP Cross-Border Foreign Trade American Retro Round-Neck T-Shirt 美式复古圆领针织衫',
         price: 15.66
     },
     {
@@ -45,9 +53,15 @@ let products = [
         storeName: 'taobao',
         weight: 'With Box232g/Without Box 232g',
         imageUrl: 'media/no_item_img.webp',
-        name: '高品质纯棉短袖T恤男女同款潮牌印花宽松休闲百搭情侣装',
+        name: 'Marca de moda de comercio exterior 高品质纯棉 camiseta de manga corta con estampado callejero',
         price: 7.90
     }
+];
+
+const oldDefaults = [
+    '潘家多拉S925纯银心形闪耀许愿星链扣头蛇骨链手链新品DIY配件',
+    '2024新款秋冬季加厚羊毛衫男士圆领针织衫保暖毛衣外套休闲',
+    '高品质纯棉短袖T恤男女同款潮牌印花宽松休闲百搭情侣装'
 ];
 
 // Load products from localStorage
@@ -55,11 +69,20 @@ function loadProducts() {
     const saved = localStorage.getItem('parcelProducts');
     if (saved) {
         const parsed = JSON.parse(saved);
-        // Ensure all prices are numbers with 2 decimals
-        products = parsed.map(p => ({
-            ...p,
-            price: Math.round((parseFloat(p.price) || 0) * 100) / 100
-        }));
+        // Ensure all prices are numbers with 2 decimals and update legacy default names
+        products = parsed.map((p, idx) => {
+            let name = p.name;
+            const oldIdx = oldDefaults.indexOf(name);
+            if (oldIdx !== -1 && products[oldIdx]) {
+                name = products[oldIdx].name;
+            }
+            return {
+                ...p,
+                name: name,
+                price: Math.round((parseFloat(p.price) || 0) * 100) / 100
+            };
+        });
+        saveProducts();
     }
     renderProducts();
 }
@@ -79,7 +102,10 @@ function renderProducts() {
     const container = document.getElementById('products-container');
     if (!container) return;
     
-    container.innerHTML = products.map(p => `
+    container.innerHTML = products.map(p => {
+        const priceUsd = parseFloat(p.price) || 0;
+        const priceYen = priceUsd * 6.96;
+        return `
         <div class="product-card">
             <div class="product-header">
                 <div class="detail-row">
@@ -102,11 +128,12 @@ function renderProducts() {
                 </div>
             </div>
             <div class="product-footer">
-                <span class="product-price">¥ ${(parseFloat(p.price) * 6.96).toFixed(2)}</span>
+                <span class="product-price">¥ ${priceYen.toFixed(2)} ($${priceUsd.toFixed(2)})</span>
                 <span class="product-qty">x1</span>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
     
     // Update grand total after rendering
     updateGrandTotal();
