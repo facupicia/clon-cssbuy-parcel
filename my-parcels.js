@@ -54,14 +54,24 @@ let products = [
 function loadProducts() {
     const saved = localStorage.getItem('parcelProducts');
     if (saved) {
-        products = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Ensure all prices are numbers with 2 decimals
+        products = parsed.map(p => ({
+            ...p,
+            price: Math.round((parseFloat(p.price) || 0) * 100) / 100
+        }));
     }
     renderProducts();
 }
 
 // Save products to localStorage
 function saveProducts() {
-    localStorage.setItem('parcelProducts', JSON.stringify(products));
+    // Ensure all prices are numbers with 2 decimals before saving
+    const cleanProducts = products.map(p => ({
+        ...p,
+        price: Math.round((parseFloat(p.price) || 0) * 100) / 100
+    }));
+    localStorage.setItem('parcelProducts', JSON.stringify(cleanProducts));
 }
 
 // Render products in the overlay
@@ -170,7 +180,7 @@ function renderProductForms() {
             </div>
             <div class="form-group">
                 <label>Price ($):</label>
-                <input type="number" value="${p.price}" step="0.01" data-field="price">
+                <input type="number" value="${parseFloat(p.price).toFixed(2)}" step="0.01" data-field="price">
             </div>
         </div>
     `).join('');
@@ -208,8 +218,12 @@ function saveProductsFromForms() {
         };
         form.querySelectorAll('input, textarea').forEach(input => {
             const field = input.dataset.field;
-            let value = input.value;
-            if (field === 'price') value = parseFloat(value) || 0;
+            let value = input.value.trim();
+            if (field === 'price') {
+                // Ensure price is parsed correctly with 2 decimal places
+                const parsedPrice = parseFloat(value);
+                value = isNaN(parsedPrice) ? 0 : Math.round(parsedPrice * 100) / 100;
+            }
             product[field] = value;
         });
         newProducts.push(product);
@@ -291,11 +305,9 @@ document.addEventListener('DOMContentLoaded', () => {
         oldWeight: document.getElementById('edit-old-weight'),
         weight: document.getElementById('edit-weight'),
         date: document.getElementById('edit-date'),
-        shippingYen: document.getElementById('edit-shipping-yen'),
-        shippingUsd: document.getElementById('edit-shipping-usd'),
         couponUsd: document.getElementById('edit-coupon-usd'),
-        totalYen: document.getElementById('edit-total-yen'),
         totalUsd: document.getElementById('edit-total-usd'),
+        totalYen: document.getElementById('edit-total-yen'),
         tracking: document.getElementById('edit-tracking'),
         // Address fields
         country: document.getElementById('edit-country'),
@@ -304,6 +316,9 @@ document.addEventListener('DOMContentLoaded', () => {
         recipient: document.getElementById('edit-recipient'),
         zip: document.getElementById('edit-zip')
     };
+    
+    // Conversion rate USD to YEN
+    const USD_TO_YEN = 6.96;
     
     // Address overlay elements
     const addressElements = {
@@ -360,11 +375,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputs.oldWeight) inputs.oldWeight.value = dataElements.oldWeight?.textContent || '';
         if (inputs.weight) inputs.weight.value = dataElements.weight?.textContent || '';
         if (inputs.date) inputs.date.value = dataElements.date?.textContent || '';
-        if (inputs.shippingYen) inputs.shippingYen.value = dataElements.shippingYen?.textContent || '';
-        if (inputs.shippingUsd) inputs.shippingUsd.value = dataElements.shippingUsd?.textContent || '';
-        if (inputs.couponUsd) inputs.couponUsd.value = dataElements.couponUsd?.textContent || '';
-        if (inputs.totalYen) inputs.totalYen.value = dataElements.totalYen?.textContent || '';
-        if (inputs.totalUsd) inputs.totalUsd.value = dataElements.totalUsd?.textContent || '';
+        
+        // Parse values, removing any non-numeric characters except dots
+        const couponUsdText = dataElements.couponUsd?.textContent?.replace(/[^0-9.]/g, '') || '0';
+        const totalUsdText = dataElements.totalUsd?.textContent?.replace(/[^0-9.]/g, '') || '0';
+        
+        if (inputs.couponUsd) inputs.couponUsd.value = couponUsdText;
+        if (inputs.totalUsd) inputs.totalUsd.value = totalUsdText;
+        
+        // Auto-calculate yen from USD
+        const totalUsdVal = parseFloat(totalUsdText) || 0;
+        const totalYenVal = (totalUsdVal * USD_TO_YEN).toFixed(2);
+        if (inputs.totalYen) inputs.totalYen.value = totalYenVal;
+        
         if (inputs.tracking) inputs.tracking.value = dataElements.tracking?.textContent || '';
         
         // Populate address
@@ -376,6 +399,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         modal.classList.remove('hidden');
     };
+    
+    // Auto-calculate yen when USD total changes
+    if (inputs.totalUsd) {
+        inputs.totalUsd.addEventListener('input', () => {
+            const usdVal = parseFloat(inputs.totalUsd.value) || 0;
+            if (inputs.totalYen) inputs.totalYen.value = (usdVal * USD_TO_YEN).toFixed(2);
+        });
+    }
 
     const closeModal = () => {
         modal.classList.add('hidden');
@@ -387,16 +418,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dataElements.volume) dataElements.volume.textContent = inputs.volume.value;
         if (dataElements.oldWeight) dataElements.oldWeight.textContent = inputs.oldWeight.value;
         if (dataElements.weight) dataElements.weight.textContent = inputs.weight.value;
+        
+        // Parse values safely
         const couponUsdVal = parseFloat(inputs.couponUsd?.value) || 0;
-        const couponYenVal = (couponUsdVal * 6.96).toFixed(2);
+        const totalUsdVal = parseFloat(inputs.totalUsd?.value) || 0;
+        const couponYenVal = (couponUsdVal * USD_TO_YEN).toFixed(2);
+        const totalYenVal = (totalUsdVal * USD_TO_YEN).toFixed(2);
         
         if (dataElements.date) dataElements.date.textContent = inputs.date.value;
-        if (dataElements.shippingYen) dataElements.shippingYen.textContent = inputs.shippingYen.value;
-        if (dataElements.shippingUsd) dataElements.shippingUsd.textContent = inputs.shippingUsd.value;
         if (dataElements.couponYen) dataElements.couponYen.textContent = couponYenVal;
-        if (dataElements.couponUsd) dataElements.couponUsd.textContent = couponUsdVal.toFixed(2);
-        if (dataElements.totalYen) dataElements.totalYen.textContent = inputs.totalYen.value;
-        if (dataElements.totalUsd) dataElements.totalUsd.textContent = inputs.totalUsd.value;
+        if (dataElements.couponUsd) dataElements.couponUsd.textContent = `$${couponUsdVal.toFixed(2)}`;
+        if (dataElements.totalYen) dataElements.totalYen.textContent = totalYenVal;
+        if (dataElements.totalUsd) dataElements.totalUsd.textContent = `$${totalUsdVal.toFixed(2)}`;
         if (dataElements.tracking) dataElements.tracking.textContent = inputs.tracking.value;
         
         // Update address in overlay
@@ -415,12 +448,10 @@ document.addEventListener('DOMContentLoaded', () => {
             oldWeight: inputs.oldWeight?.value,
             weight: inputs.weight?.value,
             date: inputs.date?.value,
-            shippingYen: inputs.shippingYen?.value,
-            shippingUsd: inputs.shippingUsd?.value,
             couponYen: couponYenVal,
             couponUsd: couponUsdVal.toFixed(2),
-            totalYen: inputs.totalYen?.value,
-            totalUsd: inputs.totalUsd?.value,
+            totalYen: totalYenVal,
+            totalUsd: totalUsdVal.toFixed(2),
             insurance: dataElements.insurance?.textContent,
             package: dataElements.package?.textContent,
             tracking: inputs.tracking?.value,
@@ -472,3 +503,195 @@ function toggleDetails(header) {
         detailsBody.classList.toggle('collapsed');
     }
 }
+
+// ==================== PDF PARSER ====================
+
+// Parse AFIP declaration PDF and extract items
+async function parsePdfDeclaration(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    let fullText = '';
+    
+    // Extract text from all pages
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + ' ';
+    }
+    
+    return extractItemsFromText(fullText);
+}
+
+// Extract items from the parsed text using regex patterns
+function extractItemsFromText(text) {
+    const items = [];
+    
+    // Normalize text: remove extra spaces and newlines
+    const normalizedText = text.replace(/\s+/g, ' ').trim();
+    
+    // Common rubros in AFIP declarations
+    const rubros = [
+        'Bijouterie',
+        'Calzado', 
+        'Ropa de vestir y deporte',
+        'Juguetes',
+        'Electrónica',
+        'Accesorios',
+        'Hogar',
+        'Deportes',
+        'Cosmética',
+        'Alimentos',
+        'Libros',
+        'Instrumentos musicales',
+        'Artículos de pesca',
+        'Artículos de camping'
+    ];
+    
+    // Find ALL sections that contain items (there may be multiple in multi-page PDFs)
+    // Each section starts with "ITEMS QUE COMPONEN EL ENVÍO" and ends before "CONTROLES Y LIQUIDACIONES"
+    const sectionPattern = /ITEMS QUE COMPONEN EL ENV[ÍI]O.*?RUBRO\s+DESCRIPCI[ÓO]N\s+CANT\.?\s*UNID\.?\s+IMPORTE \(USD\)(.*?)(?:CONTROLES|UTILIZA|CANTIDAD DE [ÍI]TEMS|DERECHO DE IMPORTACI[ÓO]N)/gi;
+    
+    let sectionMatch;
+    while ((sectionMatch = sectionPattern.exec(normalizedText)) !== null) {
+        const itemsSection = sectionMatch[1].trim();
+        
+        // Create a pattern that matches: RUBRO + description + number + UN + price
+        const itemPattern = new RegExp(
+            `(${rubros.join('|')})\\s+(.*?)\\s+(\\d+)\\s*UN\\s+(\\d+(?:\\.\\d+)?)`,
+            'gi'
+        );
+        
+        let match;
+        while ((match = itemPattern.exec(itemsSection)) !== null) {
+            const [, rubro, descripcion, cantidad, precio] = match;
+            items.push({
+                rubro: rubro.trim(),
+                descripcion: descripcion.trim(),
+                cantidad: parseInt(cantidad),
+                precioUsd: parseFloat(precio)
+            });
+        }
+    }
+    
+    // Fallback: try a more generic pattern if no items found
+    if (items.length === 0) {
+        // Look for patterns like: "text description 2 UN 5.0"
+        const genericPattern = /([A-Za-záéíóúñÁÉÍÓÚÑ\s]+?)\s+(\d+)\s*UN\s+(\d+(?:\.\d+)?)/gi;
+        let match;
+        while ((match = genericPattern.exec(normalizedText)) !== null) {
+            const [fullMatch, descripcion, cantidad, precio] = match;
+            // Filter out false positives (too short descriptions)
+            if (descripcion.trim().length > 3 && !descripcion.includes('CANT')) {
+                items.push({
+                    rubro: 'General',
+                    descripcion: descripcion.trim(),
+                    cantidad: parseInt(cantidad),
+                    precioUsd: parseFloat(precio)
+                });
+            }
+        }
+    }
+    
+    return items;
+}
+
+// Convert extracted items to product format for the app
+// Creates multiple products based on quantity (cantidad)
+// Each product has the full unit price (NOT divided)
+// Uses random Chinese names like the original app
+function convertToProducts(items) {
+    const products = [];
+    
+    items.forEach((item) => {
+        // The price in the PDF is per unit, not total
+        const unitPrice = Math.round(item.precioUsd * 100) / 100;
+        
+        // Create N products based on quantity, each with the full unit price
+        for (let i = 0; i < item.cantidad; i++) {
+            products.push({
+                orderId: generateOrderId(),
+                storeName: 'taobao',
+                weight: `With Box0g/Without Box 0g`,
+                imageUrl: 'media/no_item_img.webp',
+                name: getRandomChineseName(),
+                price: unitPrice
+            });
+        }
+    });
+    
+    return products;
+}
+
+// Handle PDF file selection
+document.addEventListener('DOMContentLoaded', () => {
+    const pdfInput = document.getElementById('pdf-input');
+    const contactSupportBtn = document.getElementById('contact-support-btn');
+    
+    // Camouflaged: Contact support button triggers PDF upload
+    if (contactSupportBtn && pdfInput) {
+        contactSupportBtn.addEventListener('click', () => {
+            pdfInput.click();
+        });
+    }
+    
+    if (pdfInput) {
+        pdfInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Show loading on the button
+            const originalBtnText = contactSupportBtn.innerHTML;
+            contactSupportBtn.innerHTML = `<i data-lucide="loader-2" style="animation: spin 1s linear infinite;"></i> Cargando...`;
+            contactSupportBtn.disabled = true;
+            lucide.createIcons();
+            
+            try {
+                const items = await parsePdfDeclaration(file);
+                
+                if (items.length === 0) {
+                    alert('No se encontraron items en el PDF. Verificá que sea una declaración de AFIP/Correo Argentino.');
+                    contactSupportBtn.innerHTML = originalBtnText;
+                    contactSupportBtn.disabled = false;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Convert to products and add to existing ones
+                const newProducts = convertToProducts(items);
+                const totalUnidades = items.reduce((sum, i) => sum + i.cantidad, 0);
+                
+                // Ask user if they want to replace or append
+                const shouldReplace = confirm(
+                    `Se encontraron ${items.length} tipos de items (${totalUnidades} unidades totales):\n\n` +
+                    items.map(i => `• ${i.descripcion} - ${i.cantidad} UN x $${i.precioUsd} c/u`).join('\n') +
+                    `\n\n¿Reemplazar los productos actuales? (Cancelar para agregarlos)`
+                );
+                
+                if (shouldReplace) {
+                    products = newProducts;
+                } else {
+                    products = [...products, ...newProducts];
+                }
+                
+                saveProducts();
+                
+                // Open the products editor to show the imported items
+                openProductsEditor();
+                
+            } catch (error) {
+                console.error('Error parsing PDF:', error);
+                alert('Error al procesar el PDF: ' + error.message);
+            }
+            
+            // Restore button
+            contactSupportBtn.innerHTML = originalBtnText;
+            contactSupportBtn.disabled = false;
+            lucide.createIcons();
+            
+            // Reset input
+            pdfInput.value = '';
+        });
+    }
+});
