@@ -19,19 +19,37 @@
 }
 
 
+/* La página no scrollea: scrollea .mobile-container. Así la barra de
+   direcciones del navegador móvil no se oculta/muestra al scrollear y el
+   menú inferior (position: fixed) no salta. */
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
 body {
     background-color: #0D1306;
     color: var(--text-white);
     display: flex;
     justify-content: center;
-    min-height: 100vh;
 }
 
 .mobile-container {
     width: 100%;
     max-width: 400px;
     background-color: #0D1306;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.mobile-container::-webkit-scrollbar {
+    display: none;
 }
 
 /* Header */
@@ -343,7 +361,7 @@ header h1 {
 /* Bottom Nav */
 .bottom-nav {
     position: fixed;
-    bottom: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
     left: 0;
     right: 0;
     margin: 0 auto;
